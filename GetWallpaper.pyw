@@ -4,19 +4,33 @@
 # 2016-6-20
 
 import os
-import urllib
-import urllib2
 import re
+import urllib2
 from time import ctime, sleep
 
-def testNetwork():
-    import subprocess
+def isConnected(log):
+    'Test whether the network is connected'
 
-    fnull = open(os.devnull, 'w')
-    ret = subprocess.call('ping www.baidu.com', shell = True, stdout = fnull, stderr = fnull)
-    fnull.close()
+    import subprocess
+    import tkMessageBox
+    import Tkinter
     
-    return ret
+    root = Tkinter.Tk()
+    root.withdraw() # hide the root window
+    fnull = open(os.devnull, 'w')
+    while True:
+        if subprocess.call('ping www.baidu.com', stdout=fnull, stderr=fnull):
+            retry = tkMessageBox.askretrycancel(title='Warning', message='The network is not connected, retry it after one minute ?')
+            if not retry:
+                log.write('[%s] The network is not connected !%s' % (ctime(), os.linesep))
+                root.destroy()
+                return False
+            sleep(60)
+        else:
+            break
+    root.destroy()
+
+    return True
 
 def main():
     # Wait computer establish the connection
@@ -24,12 +38,10 @@ def main():
 
     log = open('log.txt', 'a')
 
-    # Test whether the network is connected
-    if testNetwork():
-        log.write('[%s] The network is not connected !%s' % (ctime(), os.linesep))
+    if not isConnected(log):
         log.close()
         return
-
+    
     url = r'https://alpha.wallhaven.cc/search?categories=111&purity=100&ratios=16x10&sorting=date_added&order=desc&page=1'
     user_agent = r'Mozilla/5.0 (Windows NT 6.1; WOW64) Chrome/47.0.2526.106 Safari/537.36'
     header = {'User-Agent' : user_agent}
