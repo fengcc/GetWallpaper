@@ -19,7 +19,7 @@ def isConnected(log):
     root.withdraw() # hide the root window
     fnull = open(os.devnull, 'w')
     while True:
-        if subprocess.call('ping www.baidu.com', stdout=fnull, stderr=fnull):
+        if subprocess.call('ping www.baidu.com', shell=True, stdout=fnull, stderr=fnull):
             retry = tkMessageBox.askretrycancel(title='Warning', message='The network is not connected, retry it after one minute ?')
             if not retry:
                 log.write('[%s] The network is not connected !%s' % (ctime(), os.linesep))
