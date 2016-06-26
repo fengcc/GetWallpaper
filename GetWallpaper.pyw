@@ -23,11 +23,14 @@ def isConnected(log):
             retry = tkMessageBox.askretrycancel(title='Warning', message='The network is not connected, retry it after one minute ?')
             if not retry:
                 log.write('[%s] The network is not connected !%s' % (ctime(), os.linesep))
+                fnull.close()
                 root.destroy()
                 return False
             sleep(60)
         else:
             break
+
+    fnull.close()
     root.destroy()
 
     return True
@@ -68,14 +71,26 @@ def main():
         content = response.read()
         f = open(path, 'wb')
         f.write(content)
+        f.close()
         log.write('[%s] The wallpaper was downloaded successfully !%s' % (ctime(), os.linesep))
-    
+
     except (IOError, urllib2.URLError), e:
-        log.write(('[%s] ' % ctime()) + e)
+        if isinstance(e, IOError):
+            log.write('[%s] %s' % (ctime(), e))
+
+        elif isinstance(e, urllib2.URLError):
+            error_str = ''
+            if hasattr(e, 'code'):
+                error_str += e.code + ' '
+            if hasattr(e, 'reason'):
+                error_str += e.reason
+            log.write('[%s] %s%s' % (ctime(), error_str, os.linesep))
+
+        else:
+            pass
     
     finally:
         log.write(os.linesep)
-        f.close()
         log.close()
 
 if __name__ == '__main__':
